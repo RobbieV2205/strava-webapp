@@ -28,22 +28,60 @@ import requests
 import mysql.connector
 from dotenv import load_dotenv
 
-load_dotenv()
-
 # ── Config ────────────────────────────────────────────────────────────────────
 
-CLIENT_ID      = os.getenv("STRAVA_CLIENT_ID")
-CLIENT_SECRET  = os.getenv("STRAVA_CLIENT_SECRET")
-REDIRECT_URI   = os.getenv("STRAVA_REDIRECT_URI", "http://localhost:8080/callback")
-TOKEN_FILE     = Path(os.getenv("STRAVA_TOKEN_FILE", "strava_tokens.json"))
+CLIENT_ID = CLIENT_SECRET = REDIRECT_URI = TOKEN_FILE = None
+MYSQL_HOST = MYSQL_DATABASE = MYSQL_USER = MYSQL_PASSWORD = None
+ROOT_USER = ROOT_PASSWORD = None
+MYSQL_PORT = 3306
 
-MYSQL_HOST     = os.getenv("MYSQL_HOST", "localhost")
-MYSQL_PORT     = int(os.getenv("MYSQL_PORT", 3306))
-MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "strava_data")
-MYSQL_USER     = os.getenv("MYSQL_USER", "strava_user")
-MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "")
-ROOT_USER      = os.getenv("MYSQL_ROOT_USER", "root")
-ROOT_PASSWORD  = os.getenv("MYSQL_ROOT_PASSWORD", "")
+_ENV_PATH = Path(".env")
+
+_ENV_TEMPLATE = """\
+# Strava credentials — haal op via https://www.strava.com/settings/api
+STRAVA_CLIENT_ID=
+STRAVA_CLIENT_SECRET=
+STRAVA_REDIRECT_URI=http://localhost:8080/callback
+
+# MySQL
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_DATABASE=strava_data
+MYSQL_USER=strava_user
+MYSQL_PASSWORD=
+MYSQL_ROOT_USER=root
+MYSQL_ROOT_PASSWORD=
+"""
+
+
+def ensure_env():
+    """Maak .env aan als die ontbreekt en wacht tot de gebruiker hem heeft ingevuld."""
+    if not _ENV_PATH.exists():
+        _ENV_PATH.write_text(_ENV_TEMPLATE)
+        print(f"[setup] .env aangemaakt in {_ENV_PATH.resolve()}")
+        print("[setup] Vul de waarden in en druk daarna op Enter om door te gaan.")
+        input("[setup] Druk op Enter als .env is ingevuld: ")
+    load_dotenv(_ENV_PATH)
+
+
+def load_config():
+    """Laad config-variabelen uit de omgeving na load_dotenv()."""
+    global CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, TOKEN_FILE
+    global MYSQL_HOST, MYSQL_PORT, MYSQL_DATABASE, MYSQL_USER, MYSQL_PASSWORD
+    global ROOT_USER, ROOT_PASSWORD
+
+    CLIENT_ID      = os.getenv("STRAVA_CLIENT_ID")
+    CLIENT_SECRET  = os.getenv("STRAVA_CLIENT_SECRET")
+    REDIRECT_URI   = os.getenv("STRAVA_REDIRECT_URI", "http://localhost:8080/callback")
+    TOKEN_FILE     = Path(os.getenv("STRAVA_TOKEN_FILE", "strava_tokens.json"))
+
+    MYSQL_HOST     = os.getenv("MYSQL_HOST", "localhost")
+    MYSQL_PORT     = int(os.getenv("MYSQL_PORT", 3306))
+    MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "strava_data")
+    MYSQL_USER     = os.getenv("MYSQL_USER", "strava_user")
+    MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "")
+    ROOT_USER      = os.getenv("MYSQL_ROOT_USER", "root")
+    ROOT_PASSWORD  = os.getenv("MYSQL_ROOT_PASSWORD", "")
 
 BASE_URL  = "https://www.strava.com/api/v3"
 AUTH_URL  = "https://www.strava.com/oauth/authorize"
@@ -329,6 +367,9 @@ def upsert_runs(conn, runs: list[dict]):
 # ── Main ───────────────────────────────────────────────────────────────────────
 
 def main():
+    ensure_env()
+    load_config()
+
     if not CLIENT_ID or not CLIENT_SECRET:
         raise SystemExit("ERROR: Vul STRAVA_CLIENT_ID en STRAVA_CLIENT_SECRET in in .env")
     if not ROOT_PASSWORD:
