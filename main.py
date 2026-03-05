@@ -13,7 +13,7 @@ Gebruik:
 from pathlib import Path
 from dotenv import load_dotenv
 
-_ENV_PATH = Path(".env")
+_ENV_PATH = Path(__file__).parent / ".env"
 
 _ENV_TEMPLATE = """\
 # Strava credentials — haal op via https://www.strava.com/settings/api

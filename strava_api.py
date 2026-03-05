@@ -39,11 +39,11 @@ def get_access_token() -> str:
 
 # ── API ───────────────────────────────────────────────────────────────────────
 
-def _api_get(endpoint: str, token: str, params: dict = {}) -> list | dict:
+def _api_get(endpoint: str, token: str, params: dict | None = None) -> list | dict:
     resp = requests.get(
         f"{BASE_URL}{endpoint}",
         headers={"Authorization": f"Bearer {token}"},
-        params=params,
+        params=params or {},
     )
     if resp.status_code == 429:
         wait = max(int(resp.headers.get("X-RateLimit-Reset", 0)) - int(time.time()), 60)

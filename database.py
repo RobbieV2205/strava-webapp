@@ -94,11 +94,14 @@ def setup_database():
         f"CREATE USER IF NOT EXISTS '{MYSQL_USER}'@'%' IDENTIFIED BY '{MYSQL_PASSWORD}';"
     )
     cur.execute(
+        f"ALTER USER '{MYSQL_USER}'@'%' IDENTIFIED BY '{MYSQL_PASSWORD}';"
+    )
+    cur.execute(
         f"GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, INDEX "
         f"ON `{MYSQL_DATABASE}`.* TO '{MYSQL_USER}'@'%';"
     )
     cur.execute("FLUSH PRIVILEGES;")
-    print(f"[setup] Gebruiker `{MYSQL_USER}` aangemaakt met rechten op `{MYSQL_DATABASE}`.")
+    print(f"[setup] Gebruiker `{MYSQL_USER}` gereed met rechten op `{MYSQL_DATABASE}`.")
     cur.close()
     conn.close()
 
