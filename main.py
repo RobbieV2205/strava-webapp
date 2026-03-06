@@ -80,7 +80,7 @@ def sync_once():
 
     setup_database()
 
-    log.info("Verbinden met MySQL als %s...", MYSQL_USER)
+    #log.info("Verbinden met MySQL als %s...", MYSQL_USER)
     conn = connect()
     create_table(conn)
 
@@ -88,9 +88,9 @@ def sync_once():
 
     runs = fetch_all_runs(token)
     if runs:
-        log.info("Data schrijven — %d runs worden opgeslagen naar %s @ %s...", len(runs), MYSQL_DATABASE, MYSQL_HOST)
+        #log.info("Data schrijven — %d runs worden opgeslagen naar %s @ %s...", len(runs), MYSQL_DATABASE, MYSQL_HOST)
         upsert_runs(conn, runs)
-        log.info("Data geschreven op %s — %d runs opgeslagen.", datetime.now().strftime("%Y-%m-%d %H:%M:%S"), len(runs))
+        #log.info("Data geschreven op %s — %d runs opgeslagen.", datetime.now().strftime("%Y-%m-%d %H:%M:%S"), len(runs))
     else:
         log.info("Geen nieuwe runs gevonden — niets geschreven.")
 
