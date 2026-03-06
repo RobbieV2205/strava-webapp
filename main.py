@@ -56,9 +56,10 @@ MYSQL_ROOT_PASSWORD=
 def ensure_env():
     if not _ENV_PATH.exists():
         _ENV_PATH.write_text(_ENV_TEMPLATE)
-        print(f"[setup] .env aangemaakt in {_ENV_PATH.resolve()}")
-        print("[setup] Vul de waarden in en druk daarna op Enter om door te gaan.")
-        input("[setup] Druk op Enter als .env is ingevuld: ")
+        raise SystemExit(
+            f"[setup] .env aangemaakt in {_ENV_PATH.resolve()}\n"
+            "[setup] Vul de waarden in en start opnieuw."
+        )
     load_dotenv(_ENV_PATH)
 
 
