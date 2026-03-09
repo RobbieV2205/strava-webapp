@@ -1,3 +1,10 @@
+"""
+database.py
+-----------
+
+file with all the functions used to setup, read and write the database. 
+"""
+
 import json
 import logging
 import os
@@ -82,7 +89,7 @@ COLUMNS = [
 # ── Setup ─────────────────────────────────────────────────────────────────────
 
 def setup_database():
-    print(f"[setup] Verbinden als root met {MYSQL_HOST}:{MYSQL_PORT}...")
+    print(f"[setup] connect as root with: {MYSQL_HOST}:{MYSQL_PORT}...")
     conn = mysql.connector.connect(
         host=MYSQL_HOST, port=MYSQL_PORT,
         user=ROOT_USER, password=ROOT_PASSWORD,
@@ -92,7 +99,7 @@ def setup_database():
         f"CREATE DATABASE IF NOT EXISTS `{MYSQL_DATABASE}` "
         f"CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
     )
-    print(f"[setup] Database `{MYSQL_DATABASE}` gereed.")
+    print(f"[setup] Database `{MYSQL_DATABASE}` ready.")
     cur.execute(
         f"CREATE USER IF NOT EXISTS '{MYSQL_USER}'@'%' IDENTIFIED BY '{MYSQL_PASSWORD}';"
     )
@@ -104,7 +111,7 @@ def setup_database():
         f"ON `{MYSQL_DATABASE}`.* TO '{MYSQL_USER}'@'%';"
     )
     cur.execute("FLUSH PRIVILEGES;")
-    print(f"[setup] Gebruiker `{MYSQL_USER}` gereed met rechten op `{MYSQL_DATABASE}`.")
+    print(f"[setup] User `{MYSQL_USER}` setup with the correct credentials `{MYSQL_DATABASE}`.")
     cur.close()
     conn.close()
 
@@ -122,7 +129,7 @@ def create_table(conn):
     cur.execute(CREATE_TABLE_SQL)
     conn.commit()
     cur.close()
-    print("[setup] Tabel `runs` gereed.")
+    print("[setup] Tabel `runs` available.")
 
 # ── Upsert ────────────────────────────────────────────────────────────────────
 
@@ -170,4 +177,4 @@ def upsert_runs(conn, runs: list[dict]):
             skipped += 1
     conn.commit()
     cur.close()
-    log.info("[mysql] %d nieuw  |  %d bijgewerkt  |  %d ongewijzigd", inserted, updated, skipped)
+    log.info("[mysql] %d new  |  %d changed  |  %d unchanged", inserted, updated, skipped)

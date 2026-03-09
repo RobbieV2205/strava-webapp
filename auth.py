@@ -1,11 +1,11 @@
 """
-Strava OAuth2 autorisatie — eenmalig uitvoeren
+Strava OAuth2 authentication
 -----------------------------------------------
-Opent de browser voor Strava-autorisatie en slaat het token op in
-strava_tokens.json. Daarna vernieuwt main.py het token automatisch.
 
-Gebruik:
-    python auth.py
+opens the browser to authenticate and get the right tokens needed for the application.
+Tokens will be stored in a file called: strava_tokens.json.
+
+if the tokens arre collected succesfully this script is no longer needed.
 """
 
 import json
@@ -41,11 +41,11 @@ class _CallbackHandler(BaseHTTPRequestHandler):
             _auth_code = params["code"][0]
             self.send_response(200)
             self.end_headers()
-            self.wfile.write(b"<h2>Geautoriseerd! Je kunt dit tabblad sluiten.</h2>")
+            self.wfile.write(b"<h2>authorised! you can close this tab.</h2>")
         else:
             self.send_response(400)
             self.end_headers()
-            self.wfile.write(b"<h2>Autorisatie mislukt.</h2>")
+            self.wfile.write(b"<h2>Autorisatie failed.</h2>")
 
     def log_message(self, *args):
         pass
@@ -61,8 +61,8 @@ def authorize():
         "scope":           "read,activity:read_all",
     }
     url = f"{AUTH_URL}?{urlencode(params)}"
-    print("[auth] Browser openen voor Strava autorisatie...")
-    print(f"[auth] Werkt de browser niet? Ga naar:\n  {url}\n")
+    print("[auth] Browser opens for Strava authentication...")
+    print(f"[auth] Does the browser not work? Go to:\n  {url}\n")
     Thread(
         target=lambda: HTTPServer(("localhost", port), _CallbackHandler).handle_request(),
         daemon=True,
@@ -73,7 +73,7 @@ def authorize():
             break
         time.sleep(1)
     if not _auth_code:
-        raise RuntimeError("Autorisatie timeout — geen code ontvangen.")
+        raise RuntimeError("Authenctication timeout — no code recieved.")
     resp = requests.post(TOKEN_URL, data={
         "client_id":     CLIENT_ID,
         "client_secret": CLIENT_SECRET,
@@ -82,10 +82,10 @@ def authorize():
     })
     resp.raise_for_status()
     TOKEN_FILE.write_text(json.dumps(resp.json(), indent=2))
-    print(f"[auth] Token opgeslagen in {TOKEN_FILE}.")
+    print(f"[auth] Token stored in: {TOKEN_FILE}.")
 
 
 if __name__ == "__main__":
     if not CLIENT_ID or not CLIENT_SECRET:
-        raise SystemExit("ERROR: Vul STRAVA_CLIENT_ID en STRAVA_CLIENT_SECRET in in .env")
+        raise SystemExit("ERROR: STRAVA_CLIENT_ID and STRAVA_CLIENT_SECRET missing in .env")
     authorize()

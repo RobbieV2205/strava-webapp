@@ -1,3 +1,10 @@
+"""
+strava_api.py
+-----------
+
+file with all the functions used to fetch data from the strava api. 
+"""
+
 import json
 import os
 import time
@@ -21,10 +28,10 @@ TOKEN_URL = "https://www.strava.com/oauth/token"
 
 def get_access_token() -> str:
     if not TOKEN_FILE.exists():
-        raise SystemExit("ERROR: Geen token gevonden. Voer eerst auth.py uit.")
+        raise SystemExit("ERROR: no tokens found ren auth.py first.")
     tokens = json.loads(TOKEN_FILE.read_text())
     if tokens.get("expires_at", 0) < time.time() + 60:
-        print("[auth] Token verlopen — vernieuwen...")
+        print("[auth] Token expired — renewing token...")
         resp = requests.post(TOKEN_URL, data={
             "client_id":     CLIENT_ID,
             "client_secret": CLIENT_SECRET,
@@ -34,7 +41,7 @@ def get_access_token() -> str:
         resp.raise_for_status()
         tokens = resp.json()
         TOKEN_FILE.write_text(json.dumps(tokens, indent=2))
-        print("[auth] Token vernieuwd.")
+        print("[auth] Token renewed.")
     return tokens["access_token"]
 
 # ── API ───────────────────────────────────────────────────────────────────────
@@ -47,7 +54,7 @@ def _api_get(endpoint: str, token: str, params: dict | None = None) -> list | di
     )
     if resp.status_code == 429:
         wait = max(int(resp.headers.get("X-RateLimit-Reset", 0)) - int(time.time()), 60)
-        print(f"[api] Rate limit — wachten {wait}s...")
+        print(f"[api] Rate limit — waits {wait}s...")
         time.sleep(wait)
         return _api_get(endpoint, token, params)
     resp.raise_for_status()
@@ -56,7 +63,7 @@ def _api_get(endpoint: str, token: str, params: dict | None = None) -> list | di
 
 def fetch_all_runs(token: str) -> list[dict]:
     runs, page = [], 1
-    print("[strava] Activiteiten ophalen...")
+    print("[strava] getting activities...")
     while True:
         batch = _api_get("/athlete/activities", token, {"per_page": 200, "page": page})
         if not batch:
@@ -67,7 +74,7 @@ def fetch_all_runs(token: str) -> list[dict]:
             or a.get("type") == "Run"
         ]
         runs.extend(run_batch)
-        print(f"[strava]   pagina {page}: {len(batch)} activiteiten, {len(run_batch)} runs (totaal: {len(runs)})")
+        print(f"[strava]   page {page}: {len(batch)} activities, {len(run_batch)} runs (totaal: {len(runs)})")
         page += 1
-    print(f"[strava] Klaar — {len(runs)} runs opgehaald.")
+    print(f"[strava] finished — {len(runs)} runs received succesfully.")
     return runs
