@@ -12,6 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
 
+# Configure the logging system.
 _LOG_PATH = Path(__file__).parent / "strava_sync.log"
 _formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
@@ -26,6 +27,7 @@ _handler_file.setFormatter(_formatter)
 logging.basicConfig(level=logging.INFO, handlers=[_handler_console, _handler_file])
 log = logging.getLogger(__name__)
 
+# Set env path and interval loop time.
 _ENV_PATH = Path(__file__).parent / ".env"
 SYNC_INTERVAL_SECONDS = 6 * 60 * 60  # 6 uur
 
@@ -41,6 +43,8 @@ def ensure_env():
 
 def sync_once():
     """funtion used in the loop the sync the strava data to the database. """
+
+    # Collect necessary data from .env variables
     from database import (
         ROOT_PASSWORD, MYSQL_PASSWORD, MYSQL_USER, MYSQL_DATABASE, MYSQL_HOST,
         setup_database, connect, create_table, upsert_runs,
@@ -57,7 +61,6 @@ def sync_once():
     setup_database()
 
     conn = connect()
-    create_table(conn)
 
     token = get_access_token()
 
