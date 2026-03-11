@@ -120,6 +120,13 @@ def setup_database():
     conn.close()
 
 
+def ensure_table(conn):
+    cur = conn.cursor()
+    cur.execute(CREATE_TABLE_SQL)
+    conn.commit()
+    cur.close()
+
+
 def connect() -> mysql.connector.MySQLConnection:
     return mysql.connector.connect(
         host=MYSQL_HOST, port=MYSQL_PORT,
