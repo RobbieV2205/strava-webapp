@@ -111,10 +111,6 @@ def setup_database():
     )
     cur.execute("FLUSH PRIVILEGES;")
 
-    cur.execute(f"USE `{MYSQL_DATABASE}`;")
-    print(f"[setup] Creating runs table.")
-    cur.execute(CREATE_TABLE_SQL)
-
     print(f"[setup] User `{MYSQL_USER}` setup with the correct credentials `{MYSQL_DATABASE}`.")
     cur.close()
     conn.close()
