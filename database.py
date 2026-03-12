@@ -88,6 +88,7 @@ COLUMNS = [
 # ── Setup ─────────────────────────────────────────────────────────────────────
 
 def setup_database():
+    print('\n\n---- DATABASE SETUP DRAAIT ----------\n\n')
     print(f"[setup] connect as root with: {MYSQL_HOST}:{MYSQL_PORT}...")
     conn = mysql.connector.connect(
         host=MYSQL_HOST, port=MYSQL_PORT,
