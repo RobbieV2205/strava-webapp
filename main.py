@@ -42,8 +42,7 @@ def ensure_env():
         )
     load_dotenv(_ENV_PATH, override=True)
     
-    from database import ROOT_PASSWORD, MYSQL_PASSWORD
-
+    from database import ROOT_PASSWORD, MYSQL_PASSWORD, ROOT_PASSWORD, MYSQL_PASSWORD
     from strava_api import CLIENT_ID, CLIENT_SECRET
 
     if not CLIENT_ID or not CLIENT_SECRET:
@@ -52,6 +51,16 @@ def ensure_env():
         raise RuntimeError("MYSQL_ROOT_PASSWORD missing in .env")
     if not MYSQL_PASSWORD:
         raise RuntimeError("MYSQL_PASSWORD missing in .env")
+    
+    if not CLIENT_ID or not CLIENT_SECRET:
+        log.critical("STRAVA_CLIENT_ID or STRAVA_CLIENT_SECRET is missing in .env")
+        raise SystemExit("STRAVA_CLIENT_ID or STRAVA_CLIENT_SECRET is missing in .env")
+    if not ROOT_PASSWORD:
+        log.critical("MYSQL_ROOT_PASSWORD missing in .env")
+        raise SystemExit("MYSQL_ROOT_PASSWORD missing in .env")
+    if not MYSQL_PASSWORD:
+        log.critical("MYSQL_PASSWORD missing in .env")
+        raise SystemExit("ERROR: MYSQL_PASSWORD missing in .env")
     
 
 def ensure_database():
@@ -88,19 +97,6 @@ def sync_once():
 def main():
     ensure_env()
     ensure_database()
-
-    from database import ROOT_PASSWORD, MYSQL_PASSWORD
-    from strava_api import CLIENT_ID, CLIENT_SECRET
-
-    if not CLIENT_ID or not CLIENT_SECRET:
-        log.critical("STRAVA_CLIENT_ID or STRAVA_CLIENT_SECRET is missing in .env")
-        raise SystemExit("STRAVA_CLIENT_ID or STRAVA_CLIENT_SECRET is missing in .env")
-    if not ROOT_PASSWORD:
-        log.critical("MYSQL_ROOT_PASSWORD missing in .env")
-        raise SystemExit("MYSQL_ROOT_PASSWORD missing in .env")
-    if not MYSQL_PASSWORD:
-        log.critical("MYSQL_PASSWORD missing in .env")
-        raise SystemExit("ERROR: MYSQL_PASSWORD missing in .env")
 
     log.info("=" * 60)
     log.info("Server started — sync each %d uur. Logfile: %s", SYNC_INTERVAL_SECONDS // 3600, _LOG_PATH)

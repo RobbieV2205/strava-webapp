@@ -88,7 +88,7 @@ COLUMNS = [
 # ── Setup ─────────────────────────────────────────────────────────────────────
 
 def setup_database():
-    print(f"[setup] connect as root with: {MYSQL_HOST}:{MYSQL_PORT}...")
+    log.info(f"[setup] connect as root with: {MYSQL_HOST}:{MYSQL_PORT}...")
     conn = mysql.connector.connect(
         host=MYSQL_HOST, port=MYSQL_PORT,
         user=ROOT_USER, password=ROOT_PASSWORD,
@@ -98,7 +98,7 @@ def setup_database():
         f"CREATE DATABASE IF NOT EXISTS `{MYSQL_DATABASE}` "
         f"CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
     )
-    print(f"[setup] Database `{MYSQL_DATABASE}` ready.")
+    log.info(f"[setup] Database `{MYSQL_DATABASE}` ready.")
     cur.execute(
         f"CREATE USER IF NOT EXISTS '{MYSQL_USER}'@'%' IDENTIFIED BY '{MYSQL_PASSWORD}';"
     )
@@ -111,12 +111,12 @@ def setup_database():
     )
     cur.execute("FLUSH PRIVILEGES;")
 
-    print(f"[setup] User `{MYSQL_USER}` setup with the correct credentials `{MYSQL_DATABASE}`.")
+    log.info(f"[setup] User `{MYSQL_USER}` setup with the correct credentials `{MYSQL_DATABASE}`.")
 
     cur.execute(f"USE `{MYSQL_DATABASE}`;")
     cur.execute(CREATE_TABLE_SQL)
     conn.commit()
-    print(f"[setup] Table ready in `{MYSQL_DATABASE}`.")
+    log.info(f"[setup] Table ready in `{MYSQL_DATABASE}`.")
     cur.close()
     conn.close()
     

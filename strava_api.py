@@ -9,6 +9,7 @@ import json
 import os
 import time
 from pathlib import Path
+import logging
 
 import requests
 from dotenv import load_dotenv
@@ -23,6 +24,7 @@ TOKEN_FILE    = Path(os.getenv("STRAVA_TOKEN_FILE", "strava_tokens.json"))
 
 BASE_URL  = "https://www.strava.com/api/v3"
 TOKEN_URL = "https://www.strava.com/oauth/token"
+log = logging.getLogger(__name__)
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
@@ -31,7 +33,7 @@ def get_access_token() -> str:
         raise SystemExit("ERROR: no tokens found ren auth.py first.")
     tokens = json.loads(TOKEN_FILE.read_text())
     if tokens.get("expires_at", 0) < time.time() + 60:
-        print("[auth] Token expired — renewing token...")
+        log.info("[auth] Token expired — renewing token...")
         resp = requests.post(TOKEN_URL, data={
             "client_id":     CLIENT_ID,
             "client_secret": CLIENT_SECRET,
@@ -41,7 +43,7 @@ def get_access_token() -> str:
         resp.raise_for_status()
         tokens = resp.json()
         TOKEN_FILE.write_text(json.dumps(tokens, indent=2))
-        print("[auth] Token renewed.")
+        log.info("[auth] Token renewed.")
     return tokens["access_token"]
 
 # ── API ───────────────────────────────────────────────────────────────────────
@@ -54,7 +56,7 @@ def _api_get(endpoint: str, token: str, params: dict | None = None) -> list | di
     )
     if resp.status_code == 429:
         wait = max(int(resp.headers.get("X-RateLimit-Reset", 0)) - int(time.time()), 60)
-        print(f"[api] Rate limit — waits {wait}s...")
+        log.info(f"[api] Rate limit — waits {wait}s...")
         time.sleep(wait)
         return _api_get(endpoint, token, params)
     resp.raise_for_status()
@@ -63,7 +65,7 @@ def _api_get(endpoint: str, token: str, params: dict | None = None) -> list | di
 
 def fetch_all_runs(token: str) -> list[dict]:
     runs, page = [], 1
-    print("[strava] getting activities...")
+    log.info("[strava] getting activities...")
     while True:
         batch = _api_get("/athlete/activities", token, {"per_page": 200, "page": page})
         if not batch:
@@ -74,7 +76,7 @@ def fetch_all_runs(token: str) -> list[dict]:
             or a.get("type") == "Run"
         ]
         runs.extend(run_batch)
-        print(f"[strava]   page {page}: {len(batch)} activities, {len(run_batch)} runs (totaal: {len(runs)})")
+        log.info(f"[strava]   page {page}: {len(batch)} activities, {len(run_batch)} runs (totaal: {len(runs)})")
         page += 1
-    print(f"[strava] finished — {len(runs)} runs received succesfully.")
+    log.info(f"[strava] finished — {len(runs)} runs received succesfully.")
     return runs
