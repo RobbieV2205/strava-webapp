@@ -113,16 +113,14 @@ def setup_database():
     cur.execute("FLUSH PRIVILEGES;")
 
     print(f"[setup] User `{MYSQL_USER}` setup with the correct credentials `{MYSQL_DATABASE}`.")
-    cur.close()
-    conn.close()
 
-
-def ensure_table(conn):
-    cur = conn.cursor()
+    cur.execute(f"USE `{MYSQL_DATABASE}`;")
     cur.execute(CREATE_TABLE_SQL)
     conn.commit()
+    print(f"[setup] Table ready in `{MYSQL_DATABASE}`.")
     cur.close()
-
+    conn.close()
+    
 
 def connect() -> mysql.connector.MySQLConnection:
     return mysql.connector.connect(
