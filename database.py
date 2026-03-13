@@ -5,18 +5,16 @@ database.py
 file with all the functions used to setup, read and write the database. 
 """
 
+
 import json
 import logging
 import os
 from datetime import datetime
 import mysql.connector
 from dotenv import load_dotenv
-
 log = logging.getLogger(__name__)
-
 load_dotenv()
 
-# ── Config ────────────────────────────────────────────────────────────────────
 
 MYSQL_HOST     = os.getenv("MYSQL_HOST", "localhost")
 MYSQL_PORT     = int(os.getenv("MYSQL_PORT", 3306))
@@ -26,7 +24,6 @@ MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "")
 ROOT_USER      = os.getenv("MYSQL_ROOT_USER", "root")
 ROOT_PASSWORD  = os.getenv("MYSQL_ROOT_PASSWORD", "")
 
-# ── SQL ───────────────────────────────────────────────────────────────────────
 
 CREATE_TABLE_SQL = """
 CREATE TABLE IF NOT EXISTS runs (
@@ -72,6 +69,7 @@ CREATE TABLE IF NOT EXISTS runs (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 """
 
+
 COLUMNS = [
     "name", "sport_type", "distance", "moving_time", "elapsed_time",
     "total_elevation_gain", "elev_high", "elev_low",
@@ -85,7 +83,6 @@ COLUMNS = [
     "flagged", "workout_type", "description",
 ]
 
-# ── Setup ─────────────────────────────────────────────────────────────────────
 
 def setup_database():
     log.info(f"[setup] connect as root with: {MYSQL_HOST}:{MYSQL_PORT}...")
@@ -128,7 +125,6 @@ def connect() -> mysql.connector.MySQLConnection:
         database=MYSQL_DATABASE,
     )
 
-# ── Upsert ────────────────────────────────────────────────────────────────────
 
 def _parse_datetime(value: str | None) -> str | None:
     if not value:

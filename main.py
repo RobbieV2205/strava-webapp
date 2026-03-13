@@ -5,13 +5,14 @@ Strava Sync
 Creates database and user (if needed) and sync's all runs to database.
 """
 
+
 import time
 import logging
+import mysql.connector
 import logging.handlers
 from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
-import mysql.connector
 
 
 # Configure the logging system.

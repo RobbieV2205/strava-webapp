@@ -5,18 +5,17 @@ strava_api.py
 file with all the functions used to fetch data from the strava api. 
 """
 
+
 import json
+import logging
 import os
 import time
 from pathlib import Path
-import logging
-
 import requests
 from dotenv import load_dotenv
-
+log = logging.getLogger(__name__)
 load_dotenv()
 
-# ── Config ────────────────────────────────────────────────────────────────────
 
 CLIENT_ID     = os.getenv("STRAVA_CLIENT_ID")
 CLIENT_SECRET = os.getenv("STRAVA_CLIENT_SECRET")
@@ -24,9 +23,7 @@ TOKEN_FILE    = Path(os.getenv("STRAVA_TOKEN_FILE", "strava_tokens.json"))
 
 BASE_URL  = "https://www.strava.com/api/v3"
 TOKEN_URL = "https://www.strava.com/oauth/token"
-log = logging.getLogger(__name__)
 
-# ── Auth ──────────────────────────────────────────────────────────────────────
 
 def get_access_token() -> str:
     if not TOKEN_FILE.exists():
@@ -46,7 +43,6 @@ def get_access_token() -> str:
         log.info("[auth] Token renewed.")
     return tokens["access_token"]
 
-# ── API ───────────────────────────────────────────────────────────────────────
 
 def _api_get(endpoint: str, token: str, params: dict | None = None) -> list | dict:
     resp = requests.get(
