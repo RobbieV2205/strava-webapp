@@ -12,8 +12,10 @@ import mysql.connector
 import logging.handlers
 from datetime import datetime
 from pathlib import Path
-from dotenv import load_dotenv
-
+from dotenv import load_dotenv, set_key
+from database import connect, upsert_runs, setup_database
+from strava_api import get_access_token, fetch_all_runs
+import os
 
 # Configure the logging system.
 _LOG_PATH = Path(__file__).parent / "strava_sync.log"
@@ -56,14 +58,25 @@ def ensure_env():
     
 
 def ensure_database():
-    """ ensures database is available. creates database, user and table if not."""
-    
-    from database import setup_database, connect
-    
+    """Ensures database is available. set up database if not and sets database crated flag to treu
+       If datbase not available and flag is set to true it raises error.
+    """
+
+    already_initialized = os.getenv("DB_INITIALIZED", "").lower() == "true"
+
     try:
         conn = connect()
-    except mysql.connector.Error:
+        conn.close()
+    except mysql.connector.Error as exc:
+        if already_initialized:
+            raise SystemExit(
+                "Database not available after creation please check database."
+                f"System raised error: {exc}"
+            )
         setup_database()
+        log.info("Database created.")
+        set_key(_ENV_PATH, "DB_INITIALIZED", "true")
+        load_dotenv(_ENV_PATH, override=True)
 
 
 def sync_once():
@@ -71,13 +84,10 @@ def sync_once():
 
     load_dotenv(_ENV_PATH, override=True)
 
-    from database import connect, upsert_runs
-    from strava_api import get_access_token, fetch_all_runs
-
     token = get_access_token()
     conn = connect()
-
     runs = fetch_all_runs(token)
+    
     if runs:
         upsert_runs(conn, runs)
     else:
