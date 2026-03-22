@@ -67,7 +67,6 @@ def fetch_all_runs(token: str) -> list[dict]:
     """ uses _api_get to receive data from strava api and returns them to be written in database. """
 
     runs, page = [], 1
-    log.info("[strava] getting activities...")
     while True:
         batch = _api_get("/athlete/activities", token, {"per_page": 200, "page": page})
         if not batch:
@@ -78,7 +77,5 @@ def fetch_all_runs(token: str) -> list[dict]:
             or a.get("type") == "Run"
         ]
         runs.extend(run_batch)
-        log.info(f"[strava]   page {page}: {len(batch)} activities, {len(run_batch)} runs (totaal: {len(runs)})")
         page += 1
-    log.info(f"[strava] finished — {len(runs)} runs received succesfully.")
     return runs
